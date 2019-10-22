@@ -30,13 +30,13 @@ namespace Generation.Dungeon
             Generate();
         }
 
-        protected virtual void Generate()
+        public virtual void Generate()
         {
             if (!Application.isPlaying) return;
             StartCoroutine(GenerateRoutine());
         }
 
-        protected virtual IEnumerator GenerateRoutine()
+        public virtual IEnumerator GenerateRoutine()
         {
             Initialize();
             
@@ -50,7 +50,7 @@ namespace Generation.Dungeon
             onGenerationDoneEvent.Invoke();
         }
             
-        protected virtual void Initialize()
+        public virtual void Initialize()
         {
             RemoveChildren(tileGenerator.TileContainer);
             RemoveChildren(pathwayGenerator.PathContainer);
@@ -65,7 +65,7 @@ namespace Generation.Dungeon
             roomCreator.SetSeed(seed);
         }
 
-        protected virtual void CleanUp()
+        public virtual void CleanUp()
         {
             RemoveChildren(tileGenerator.TileContainer);
         }
