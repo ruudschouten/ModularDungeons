@@ -1,0 +1,3 @@
+[submodule "Assets/3rd Party/NaughtyAttributes"]
+	path = Assets/3rd Party/NaughtyAttributes
+	url = https://github.com/dbrizov/NaughtyAttributes
