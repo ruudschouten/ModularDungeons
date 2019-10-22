@@ -22,15 +22,9 @@ namespace Generation.Dungeon
         public float3 StartPosition => roomCreator.StartPosition;
         public float3 EndPosition => roomCreator.EndPosition;
         public UnityEvent OnGenerationDoneEvent => onGenerationDoneEvent;
-
-        private int _basePointAmount;
-        private int _baseRadius;
         
         private void Awake()
         {
-            _basePointAmount = tileGenerator.TileAmount;
-            _baseRadius = tileGenerator.Radius;
-            
             if (!generateOnAwake) return;
             
             Generate();
@@ -71,7 +65,7 @@ namespace Generation.Dungeon
             roomCreator.SetSeed(seed);
         }
 
-        protected void CleanUp()
+        protected virtual void CleanUp()
         {
             RemoveChildren(tileGenerator.TileContainer);
         }
