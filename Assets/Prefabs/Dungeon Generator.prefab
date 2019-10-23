@@ -74,7 +74,7 @@ GameObject:
   - component: {fileID: 5086702501535315283}
   - component: {fileID: 3249215086958777674}
   m_Layer: 0
-  m_Name: Dungeon Generator 1
+  m_Name: Dungeon Generator
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -87,7 +87,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5783076098136431449}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -108,6 +108,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   generateOnAwake: 1
+  includeSmallTiles: 1
   tileGenerator: {fileID: 3973019540747118760}
   pathwayGenerator: {fileID: 5086702501535315283}
   roomCreator: {fileID: 3249215086958777674}
@@ -137,14 +138,14 @@ MonoBehaviour:
       x: 4
       y: 12
     c1:
-      x: 4
+      x: 8
       y: 8
     c2:
       x: 4
       y: 12
-  verticalPosition: {x: -2, y: 2}
+  verticalPosition: {x: 0, y: 0}
   maxTimeToWait: 2.5
-  meanFactor: 0.5
+  meanFactor: 1.05
 --- !u!114 &5086702501535315283
 MonoBehaviour:
   m_ObjectHideFlags: 0
