@@ -9,6 +9,7 @@ namespace Generation.Dungeon
     public class DungeonGenerator : MonoBehaviour
     {
         [SerializeField] protected bool generateOnAwake;
+        [SerializeField] protected bool includeSmallTiles;
         
         [SerializeField] protected TileGenerator tileGenerator;
         [SerializeField] protected PathwayGenerator pathwayGenerator;
@@ -40,11 +41,11 @@ namespace Generation.Dungeon
         {
             Initialize();
             
-            yield return tileGenerator.GenerateRoutine();
+            yield return tileGenerator.GenerateRoutine(includeSmallTiles);
             
             pathwayGenerator.GeneratePathways(tileGenerator.EdgeEndpoints);
-            roomCreator.CreateRooms(tileGenerator.MainTiles);
-            
+            roomCreator.CreateRooms(includeSmallTiles ? tileGenerator.Tiles : tileGenerator.MainTiles);
+
             CleanUp();
             
             onGenerationDoneEvent.Invoke();
