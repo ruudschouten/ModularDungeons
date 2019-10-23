@@ -28,7 +28,8 @@ namespace Generation.Dungeon
         private float maxTimeToWait = 2.5f;
 
         [SerializeField] [MinValue(.5f)] 
-        [Tooltip("Decides when a tile becomes a main tile \n(tileSize > averageSize * meanFactor)")] 
+        [Tooltip("Decides when a tile becomes a main tile \n(tileSize > averageSize * meanFactor)\n" +
+                 "Is Ignored if DungeonGenerator has `includeSmallTiles` enabled")] 
         private float meanFactor;
         
         #endregion
@@ -38,6 +39,7 @@ namespace Generation.Dungeon
         public Transform TileContainer => tileContainer;
         public List<EdgeEndpoint> EdgeEndpoints => _endpoints;
         public List<Tile> MainTiles => _mainTiles;
+        public List<Tile> Tiles => _tiles;
 
         public int Radius
         {
@@ -68,7 +70,7 @@ namespace Generation.Dungeon
             _random = new Random(seed);
         }
         
-        public IEnumerator GenerateRoutine()
+        public IEnumerator GenerateRoutine(bool includeSmallTiles)
         {
             Initialize();
 
@@ -76,7 +78,7 @@ namespace Generation.Dungeon
 
             SelectMainTiles();
 
-            yield return WaitForCollisionResolved();
+            yield return WaitForCollisionResolved(includeSmallTiles);
         }
 
         private void Initialize()
@@ -126,7 +128,7 @@ namespace Generation.Dungeon
             }
         }
 
-        private IEnumerator WaitForCollisionResolved()
+        private IEnumerator WaitForCollisionResolved(bool includeSmallTiles)
         {
             yield return new WaitForEndOfFrame();
 
@@ -156,11 +158,13 @@ namespace Generation.Dungeon
             }
 
             yield return null;
-
+            
+            
             _mainTiles = _tiles.Where(x => x.Type == TileType.Main).ToList();
-
-            // Loop through all main tiles and add their positions to the _endpoints list.
-            foreach (var tile in _mainTiles)
+            
+            // Loop through all tiles and add their positions to the _endpoints list.
+            // If includeSmallTiles is set to true, it'll include all tiles in the calculation
+            foreach (var tile in includeSmallTiles ? _tiles : _mainTiles)
             {
                 var pos = tile.BottomRectangle.Center;
                 _endpoints.Add(new EdgeEndpoint(pos, tile));

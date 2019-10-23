@@ -9,11 +9,9 @@ namespace Generation.Dungeon.Parts
         [SerializeField] private Transform pillar;
         [SerializeField] private Transform bottomPart;
 
-        public void SetSize(Vector3 bottom, Vector3 top, RectangleSide direction, float floorThickness, 
+        public void SetSize(Vector3 bottom, float height, RectangleSide direction, float floorThickness, 
             float ceilingThickness, Vector3 tileScale)
         {
-            var height = (top.y - bottom.y);
-
             var smallerScale = tileScale.x < tileScale.z ? tileScale.x : tileScale.z;
 
             topPart.localScale =
