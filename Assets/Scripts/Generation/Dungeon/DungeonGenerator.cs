@@ -8,16 +8,16 @@ namespace Generation.Dungeon
 {
     public class DungeonGenerator : MonoBehaviour
     {
-        [SerializeField] private bool generateOnAwake;
+        [SerializeField] protected bool generateOnAwake;
         
-        [SerializeField] private TileGenerator tileGenerator;
-        [SerializeField] private PathwayGenerator pathwayGenerator;
-        [SerializeField] private RoomCreator roomCreator;
+        [SerializeField] protected TileGenerator tileGenerator;
+        [SerializeField] protected PathwayGenerator pathwayGenerator;
+        [SerializeField] protected RoomCreator roomCreator;
          
-        [SerializeField] private bool useSeededRandom;
-        [ShowIf("useSeededRandom")] [SerializeField] private uint seed;
+        [SerializeField] protected bool useSeededRandom;
+        [ShowIf("useSeededRandom")] [SerializeField] protected uint seed;
         
-        [SerializeField] private UnityEvent onGenerationDoneEvent;
+        [SerializeField] protected UnityEvent onGenerationDoneEvent;
 
         public float3 StartPosition => roomCreator.StartPosition;
         public float3 EndPosition => roomCreator.EndPosition;
@@ -70,7 +70,7 @@ namespace Generation.Dungeon
             RemoveChildren(tileGenerator.TileContainer);
         }
 
-        private void RemoveChildren(Transform t)
+        protected void RemoveChildren(Transform t)
         {
             foreach (Transform child in t)
             {
