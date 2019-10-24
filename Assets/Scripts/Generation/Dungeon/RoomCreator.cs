@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Generation.Dungeon.Parts;
 using MyMath.Primitives;
+using MyMath.Random;
 using NaughtyAttributes;
 using Unity.Mathematics;
 using UnityEngine;
@@ -9,7 +10,7 @@ using Random = Unity.Mathematics.Random;
 
 namespace Generation.Dungeon
 {
-    public class RoomCreator : MonoBehaviour
+    public class RoomCreator : RandomGenerationComponent
     {
         [SerializeField] private Transform roomContainer;
 
@@ -34,13 +35,6 @@ namespace Generation.Dungeon
         private float3 _startPosition;
         private float3 _endPosition;
 
-        private Random _random;
-
-        public void SetSeed(uint seed)
-        {
-            _random = new Random(seed);
-        }
-
         private void Initialize()
         {
             _lowestPoint = int.MaxValue;
@@ -61,7 +55,7 @@ namespace Generation.Dungeon
             // Calculate special tiles
             var remainingTiles = tiles.Count - 2;
             var specialTiles = remainingTiles > extraModifierChanceProbability
-                ? _random.NextInt(0 + extraModifierChanceProbability, remainingTiles)
+                ? Random.NextInt(0 + extraModifierChanceProbability, remainingTiles)
                 : remainingTiles;
 
             // Remove the minimum regular tiles that are required
@@ -95,7 +89,7 @@ namespace Generation.Dungeon
 
                 if (specialTiles > 0)
                 {
-                    modifier = (RoomModifier) _random.NextInt(0, roomModifiers);
+                    modifier = (RoomModifier) Random.NextInt(0, roomModifiers);
                     specialTiles--;
                 }
 
@@ -219,11 +213,6 @@ namespace Generation.Dungeon
                 ceilingThickness,
                 scale
             );
-        }
-
-        private T RandomFromList<T>(IReadOnlyList<T> list)
-        {
-            return list[_random.NextInt(0, list.Count - 1)];
         }
     }
 }
