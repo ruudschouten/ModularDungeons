@@ -1,4 +1,5 @@
 using System.Collections;
+using MyMath.Random;
 using NaughtyAttributes;
 using Unity.Mathematics;
 using UnityEngine;
@@ -14,6 +15,8 @@ namespace Generation.Dungeon
         [SerializeField] protected TileGenerator tileGenerator;
         [SerializeField] protected PathwayGenerator pathwayGenerator;
         [SerializeField] protected RoomCreator roomCreator;
+        [SerializeField] protected RandomGenerationType generationType;
+        [ShowIf("IsBiased")] [SerializeField] protected int rollCount;
          
         [SerializeField] protected bool useSeededRandom;
         [ShowIf("useSeededRandom")] [SerializeField] protected uint seed;
@@ -23,7 +26,7 @@ namespace Generation.Dungeon
         public float3 StartPosition => roomCreator.StartPosition;
         public float3 EndPosition => roomCreator.EndPosition;
         public UnityEvent OnGenerationDoneEvent => onGenerationDoneEvent;
-        
+
         private void Awake()
         {
             if (!generateOnAwake) return;
@@ -62,8 +65,8 @@ namespace Generation.Dungeon
                 seed = (uint) new System.Random().Next();
             }
             
-            tileGenerator.SetSeed(seed);
-            roomCreator.SetSeed(seed);
+            tileGenerator.SetRandomType(generationType, seed, rollCount);
+            roomCreator.SetRandomType(generationType, seed, rollCount);
         }
 
         public virtual void CleanUp()
@@ -77,6 +80,12 @@ namespace Generation.Dungeon
             {
                 Destroy(child.gameObject);
             }
+        }
+        
+        // Used solely for the `showIf` Attribute
+        private bool IsBiased()
+        {
+            return generationType == RandomGenerationType.Biased;
         }
     }
 }
