@@ -7,11 +7,10 @@ using MyMath.Primitives;
 using NaughtyAttributes;
 using Unity.Mathematics;
 using UnityEngine;
-using Random = Unity.Mathematics.Random;
 
 namespace Generation.Dungeon
 {
-    public class TileGenerator : MonoBehaviour
+    public class TileGenerator : RandomGenerationComponent
     {
         #region Editor Fields
         
@@ -61,14 +60,8 @@ namespace Generation.Dungeon
         private List<Tile> _tiles = new List<Tile>();
         private List<Tile> _mainTiles = new List<Tile>();
         private List<EdgeEndpoint> _endpoints = new List<EdgeEndpoint>();
-        private Random _random;
 
         #endregion
-
-        public void SetSeed(uint seed)
-        {
-            _random = new Random(seed);
-        }
         
         public IEnumerator GenerateRoutine(bool includeSmallTiles)
         {
@@ -95,7 +88,7 @@ namespace Generation.Dungeon
             for (var i = 0; i < tileAmount; i++)
             {
                 var pos = UnityEngine.Random.insideUnitSphere * radius;
-                pos.y = _random.NextFloat(verticalPosition.x, verticalPosition.y);
+                pos.y = Random.NextFloat(verticalPosition.x, verticalPosition.y);
                 var tile = Instantiate(prefab, pos, Quaternion.identity, tileContainer);
                 tile.Type = TileType.Regular;
                 AlterTile(tile.transform);
@@ -106,9 +99,9 @@ namespace Generation.Dungeon
         private void AlterTile(Transform trans)
         {
             var newScale = new Vector3(
-                _random.NextFloat(tileSize.c0.x, tileSize.c0.y),
-                _random.NextFloat(tileSize.c1.x, tileSize.c1.y),
-                _random.NextFloat(tileSize.c2.x, tileSize.c2.y));
+                Random.NextFloat(tileSize.c0.x, tileSize.c0.y),
+                Random.NextFloat(tileSize.c1.x, tileSize.c1.y),
+                Random.NextFloat(tileSize.c2.x, tileSize.c2.y));
 
             trans.localScale = newScale;
 
