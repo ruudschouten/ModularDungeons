@@ -27,7 +27,7 @@ namespace Generation.Dungeon
         public float3 EndPosition => roomCreator.EndPosition;
         public UnityEvent OnGenerationDoneEvent => onGenerationDoneEvent;
 
-        private void Awake()
+        protected virtual void Awake()
         {
             if (!generateOnAwake) return;
             
