@@ -24,6 +24,9 @@ namespace Generation.Dungeon
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
+            
+            // Set the seed for UnityEngine.Random, so `UnityEngine.Random.insideUnitSphere` can be used
+            UnityEngine.Random.InitState((int) seed);
         }
 
         protected T RandomFromList<T>(IReadOnlyList<T> list)
