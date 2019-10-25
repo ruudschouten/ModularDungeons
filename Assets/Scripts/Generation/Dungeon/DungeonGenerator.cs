@@ -20,11 +20,14 @@ namespace Generation.Dungeon
          
         [SerializeField] protected bool useSeededRandom;
         [ShowIf("useSeededRandom")] [SerializeField] protected uint seed;
-        
-        [SerializeField] protected UnityEvent onGenerationDoneEvent;
+
+        [SerializeField] private bool showEvents;
+        [ShowIf("showEvents")] [SerializeField] protected UnityEvent onGenerationStartEvent;
+        [ShowIf("showEvents")] [SerializeField] protected UnityEvent onGenerationDoneEvent;
 
         public float3 StartPosition => roomCreator.StartPosition;
         public float3 EndPosition => roomCreator.EndPosition;
+        public UnityEvent OnGenerationStartEvent => onGenerationStartEvent;
         public UnityEvent OnGenerationDoneEvent => onGenerationDoneEvent;
 
         protected virtual void Awake()
@@ -43,6 +46,8 @@ namespace Generation.Dungeon
 
         public virtual IEnumerator GenerateRoutine()
         {
+            onGenerationStartEvent.Invoke();
+            
             Initialize();
             
             yield return tileGenerator.GenerateRoutine(includeSmallTiles);
