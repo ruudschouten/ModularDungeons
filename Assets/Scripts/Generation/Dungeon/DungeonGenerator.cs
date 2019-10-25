@@ -1,5 +1,6 @@
 using System.Collections;
 using MyMath.Random;
+using MyMath.Random.Types;
 using NaughtyAttributes;
 using Unity.Mathematics;
 using UnityEngine;
