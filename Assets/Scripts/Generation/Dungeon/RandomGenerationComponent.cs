@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using MyMath.Random;
+using MyMath.Random.Interface;
+using MyMath.Random.Types;
 using UnityEngine;
 
 namespace Generation.Dungeon
@@ -10,7 +12,8 @@ namespace Generation.Dungeon
         protected IRandom Random;
         
         public void SetRandomType(RandomGenerationType type, uint seed, int rollCount)
-        {switch (type)
+        {
+            switch (type)
             {
                 case RandomGenerationType.Regular:
                     Random = new RegularRandom(seed);
@@ -21,6 +24,9 @@ namespace Generation.Dungeon
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
+            
+            // Set the seed for UnityEngine.Random, so `UnityEngine.Random.insideUnitSphere` can be used
+            UnityEngine.Random.InitState((int) seed);
         }
 
         protected T RandomFromList<T>(IReadOnlyList<T> list)

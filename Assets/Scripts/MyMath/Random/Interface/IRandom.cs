@@ -1,4 +1,4 @@
-﻿namespace MyMath.Random
+﻿namespace MyMath.Random.Interface
 {
     public interface IRandom
     {

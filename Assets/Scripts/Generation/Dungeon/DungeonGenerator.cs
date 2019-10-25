@@ -1,5 +1,5 @@
 using System.Collections;
-using MyMath.Random;
+using MyMath.Random.Types;
 using NaughtyAttributes;
 using Unity.Mathematics;
 using UnityEngine;
@@ -34,6 +34,7 @@ namespace Generation.Dungeon
             Generate();
         }
 
+        [Button("Generate")]
         public virtual void Generate()
         {
             if (!Application.isPlaying) return;
