@@ -84,7 +84,7 @@ namespace Generation.Dungeon
         }
         
         // Used solely for the `showIf` Attribute
-        private bool IsBiased()
+        protected bool IsBiased()
         {
             return generationType == RandomGenerationType.Biased;
         }
