@@ -362,6 +362,21 @@ PrefabInstance:
       propertyPath: rollCount
       value: 3
       objectReference: {fileID: 0}
+    - target: {fileID: 5511338944038374612, guid: 0531f7bdd06024af4964af0196e6f472,
+        type: 3}
+      propertyPath: includeSmallTiles
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5511338944038374612, guid: 0531f7bdd06024af4964af0196e6f472,
+        type: 3}
+      propertyPath: useSeededRandom
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5511338944038374612, guid: 0531f7bdd06024af4964af0196e6f472,
+        type: 3}
+      propertyPath: seed
+      value: 165795579
+      objectReference: {fileID: 0}
     - target: {fileID: 3973019540747118760, guid: 0531f7bdd06024af4964af0196e6f472,
         type: 3}
       propertyPath: tileSize.c0.y
@@ -381,6 +396,36 @@ PrefabInstance:
         type: 3}
       propertyPath: tileSize.c2.x
       value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 3973019540747118760, guid: 0531f7bdd06024af4964af0196e6f472,
+        type: 3}
+      propertyPath: tileAmount
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 3973019540747118760, guid: 0531f7bdd06024af4964af0196e6f472,
+        type: 3}
+      propertyPath: radius
+      value: 60
+      objectReference: {fileID: 0}
+    - target: {fileID: 5086702501535315283, guid: 0531f7bdd06024af4964af0196e6f472,
+        type: 3}
+      propertyPath: minLengthForCorner
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 5086702501535315283, guid: 0531f7bdd06024af4964af0196e6f472,
+        type: 3}
+      propertyPath: verticesSize
+      value: 0.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 5086702501535315283, guid: 0531f7bdd06024af4964af0196e6f472,
+        type: 3}
+      propertyPath: pathWidth
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 5086702501535315283, guid: 0531f7bdd06024af4964af0196e6f472,
+        type: 3}
+      propertyPath: minLengthForPath
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0531f7bdd06024af4964af0196e6f472, type: 3}

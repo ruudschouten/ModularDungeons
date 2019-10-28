@@ -18,6 +18,8 @@ namespace Generation.Dungeon
         [SerializeField] private float pathWidth;
         [SerializeField] [MinValue(3)] private int rows;
         [SerializeField] [MinValue(2)] private int columns;
+        [SerializeField] private float minLengthForPath;
+        [SerializeField] private float minLengthForCorner;
         [SerializeField] private bool addBranchingPaths;
         [ShowIf("addBranchingPaths")] [SerializeField] private int branchingPaths;
 
@@ -76,42 +78,47 @@ namespace Generation.Dungeon
                 // Get the closets points from the start and the end edge endpoint
                 var s = GetClosestPoint(start, end.Tile.BottomRectangle.Center, true);
                 var e = GetClosestPoint(end, s, true);
-
+                
+                var meetsMinLength = MeetsHorizontalRequirements(s, e, minLengthForPath);
+                if (!meetsMinLength) continue;
+                
                 var y = (s.y + e.y) / 2f;
                 var startPoint = new EdgeEndpoint(s, start.Tile);
                 var endPoint = new EdgeEndpoint(e, end.Tile);
+                
+                var corner = CreateCorners(s, e, y, out var secondaryCorner, out var skipCorner);
 
-                float3 corner;
-                float3 secondaryCorner;
-                if (s.x < e.x) // if s is closer than e
+                if (skipCorner)
                 {
-                    corner = new float3(s.x, y, e.z);
-                    secondaryCorner = new float3(corner.x + pathWidth, corner.y, e.z);
+                    pathways.Add(new Edge(startPoint, endPoint));
+                    continue;
                 }
-                else // if e is closer than s
-                {
-                    corner = new float3(e.x, y, s.z);
-                    secondaryCorner = new float3(corner.x - pathWidth, corner.y, s.z);
-                }
-
-                var yStartDist = math.distance(s.y, corner.y);
-                var yEndDist = math.distance(secondaryCorner.y, e.y);
-                var horizontal = math.distance(s.xz, end.Vertex.xz) / 2;
-
-                // Check if path length is long enough for it to gain a curve
-                if (yStartDist > 6f && yEndDist > 6f && horizontal > 15f)
+                // Check if path length is long enough for it to gain a corner
+                var horizontal = MeetsHorizontalRequirements(s, e, minLengthForCorner);
+                if (horizontal)
                 {
                     var cornerPoint = new EdgeEndpoint(corner);
-                    var secondaryPoint = new EdgeEndpoint(secondaryCorner);
-
-                    // Recheck which point is closer from the newest point
-                    e = GetClosestPoint(end, secondaryCorner, false);
-                    // Reassign positions
-                    endPoint = new EdgeEndpoint(e, end.Tile);
-
                     pathways.Add(new Edge(startPoint, cornerPoint));
-                    pathways.Add(new Edge(cornerPoint, secondaryPoint));
-                    pathways.Add(new Edge(secondaryPoint, endPoint));
+                    
+                    var vertical = MeetsVerticalRequirements(s, e, corner, secondaryCorner, minLengthForCorner);
+                    // Only add a secondary point for the corner if the vertical requirements are met
+                    if (vertical)
+                    {
+                        var secondaryPoint = new EdgeEndpoint(secondaryCorner);
+                    
+                        // Recheck which point is closer from the newest point
+                        end.UsedCenters.Remove(e);
+                        e = GetClosestPoint(end, secondaryCorner, true);
+                        // Reassign positions
+                        endPoint = new EdgeEndpoint(e, end.Tile);
+                        
+                        pathways.Add(new Edge(cornerPoint, secondaryPoint));
+                        pathways.Add(new Edge(secondaryPoint, endPoint));
+                    }
+                    else
+                    {
+                        pathways.Add(new Edge(cornerPoint, endPoint));
+                    }
                 }
                 else
                 {
@@ -120,6 +127,54 @@ namespace Generation.Dungeon
             }
 
             return pathways;
+        }
+
+        // TODO: Rewrite this with the use of a list
+        private float3 CreateCorners(float3 s, float3 e, float y, out float3 secondary, out bool skipCorner)
+        {
+            var corner = float3.zero;
+            secondary = float3.zero;
+            skipCorner = false;
+            if (s.x < e.x) // if s is closer to the origin than e
+            {
+                if (s.z < e.z) // if s is closer to the right of the origin than e
+                {
+                    corner = new float3(s.x, y, e.z);
+                    secondary = new float3(corner.x + pathWidth, corner.y, e.z);
+                }
+                else if (s.z > e.z) // if s if closer to the left of the origin than e
+                {
+                    corner = new float3(s.x, y, e.z);
+                    secondary = new float3(e.x + pathWidth, corner.y, s.z);
+                }
+                else // if s is and e have the same distance from origin
+                {
+                    skipCorner = true;
+                }
+            }
+            else if (e.x < s.x) // if e is closer to the origin than s
+            {
+                if (e.z < s.z) // if e is closer to the right of the origin than s
+                {
+                    corner = new float3(s.x, y, e.z);
+                    secondary = new float3(corner.x + pathWidth, corner.y, e.z);
+                }
+                else if (e.z > s.z) // if e is closer to the left of the origin than s
+                {
+                    corner = new float3(s.x, y, e.z);
+                    secondary = new float3(e.x + pathWidth, corner.y, s.z);
+                }
+                else
+                {
+                    skipCorner = true;
+                }
+            }
+            else
+            {
+                skipCorner = true;
+            }
+
+            return corner;
         }
 
         private float3 GetClosestPoint(EdgeEndpoint endpoint, float3 point, bool skipUsedSpots)
@@ -145,6 +200,35 @@ namespace Generation.Dungeon
             }
 
             return closest;
+        }
+
+        private bool MeetsVerticalRequirements(float3 start, float3 end, float3 corner, float3 secondaryCorner, float requirement)
+        {
+            var yStartLength = math.distance(start.y, corner.y);
+            var yEndLength = math.distance(secondaryCorner.y, end.y);
+            var yLength = math.distance(start.y, end.y);
+            if (yLength >= 1f)
+            {
+                if (yStartLength >= requirement || yEndLength >= requirement)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        
+        private bool MeetsHorizontalRequirements(float3 start, float3 end, float requirement)
+        {
+            var xLength = math.distance(start.x, end.x);
+            var zLength = math.distance(start.x, end.x);
+
+            if (xLength >= requirement || zLength >= requirement)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         private void TurnPathwayIntoMesh(Edge edge)
