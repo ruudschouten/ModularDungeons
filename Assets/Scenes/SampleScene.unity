@@ -425,6 +425,11 @@ PrefabInstance:
     - target: {fileID: 5086702501535315283, guid: 0531f7bdd06024af4964af0196e6f472,
         type: 3}
       propertyPath: minLengthForPath
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 5086702501535315283, guid: 0531f7bdd06024af4964af0196e6f472,
+        type: 3}
+      propertyPath: pathShouldHaveMinLength
       value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
