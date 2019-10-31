@@ -79,8 +79,8 @@ namespace Generation.Dungeon
 
                 if (pathShouldHaveMinLength)
                 {
-                    var meetsMinLength = MeetsHorizontalRequirements(s, e, minLengthForPath);
-                    if (!meetsMinLength) continue;
+                    var length = math.distance(s, e);
+                    if (length < minLengthForPath) continue;
                 }
                 
                 pathways.AddRange(CreateEdges(edge, s, e));
@@ -233,7 +233,7 @@ namespace Generation.Dungeon
         private bool MeetsVerticalRequirements(float3 start, float3 end, List<float3> corners, float requirement)
         {
             var yLength = math.distance(start.y, end.y);
-            if (corners.Any())
+            if (corners != null && corners.Any())
             {
                 var yStartLength = math.distance(start.y, corners[0].y);
                 var yEndLength = math.distance(corners[corners.Count - 1].y, end.y);
