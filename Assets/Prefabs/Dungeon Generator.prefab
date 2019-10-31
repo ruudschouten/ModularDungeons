@@ -112,8 +112,10 @@ MonoBehaviour:
   tileGenerator: {fileID: 3973019540747118760}
   pathwayGenerator: {fileID: 5086702501535315283}
   roomCreator: {fileID: 3249215086958777674}
+  generationType: 1
+  rollCount: 5
   useSeededRandom: 0
-  seed: 0
+  seed: 165795579
   onGenerationDoneEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -136,13 +138,13 @@ MonoBehaviour:
   tileSize:
     c0:
       x: 4
-      y: 12
+      y: 35
     c1:
       x: 8
       y: 8
     c2:
       x: 4
-      y: 12
+      y: 35
   verticalPosition: {x: 0, y: 0}
   maxTimeToWait: 2.5
   meanFactor: 1.05
@@ -160,9 +162,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   prefab: {fileID: 8242107159027295388, guid: bd5b67a5ae1b629f38769aa9bd63a81f, type: 3}
   pathwayContainer: {fileID: 2066552059543116207}
-  pathWidth: 5
+  pathWidth: 4
   rows: 3
   columns: 2
+  pathShouldHaveMinLength: 1
+  minLengthForPath: 3
+  minLengthForCorner: 4
   addBranchingPaths: 0
   branchingPaths: 0
   spanningTreeColour: {r: 1, g: 0, b: 0, a: 1}
@@ -171,7 +176,7 @@ MonoBehaviour:
   renderSpanningTree: 1
   renderPathways: 1
   renderVertices: 1
-  verticesSize: 0.5
+  verticesSize: 0.25
 --- !u!114 &3249215086958777674
 MonoBehaviour:
   m_ObjectHideFlags: 0
