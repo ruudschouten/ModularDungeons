@@ -38,6 +38,9 @@ namespace Generation.Dungeon.Parts
 
         public bool IsColliding => isColliding;
         public float CollectiveSize => transform.localScale.x + transform.localScale.y + transform.localScale.z;
+        public float Width => transform.localScale.x;
+        public float Depth => transform.localScale.z;
+        public float HorizontalSize => (Width + Depth) / 2;
         public Vector3 Center => collider.bounds.center;
         public float HighestPoint => TopRectangle.Center.y;
         public float LowestPoint => BottomRectangle.Center.y;

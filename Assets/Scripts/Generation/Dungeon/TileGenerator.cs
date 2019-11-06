@@ -60,18 +60,21 @@ namespace Generation.Dungeon
         private List<Tile> _tiles = new List<Tile>();
         private List<Tile> _mainTiles = new List<Tile>();
         private List<EdgeEndpoint> _endpoints = new List<EdgeEndpoint>();
+        private bool _includeSmallTiles;
 
         #endregion
         
         public IEnumerator GenerateRoutine(bool includeSmallTiles)
         {
+            _includeSmallTiles = includeSmallTiles;
+            
             Initialize();
 
             GeneratePoints();
 
             SelectMainTiles();
 
-            yield return WaitForCollisionResolved(includeSmallTiles);
+            yield return WaitForCollisionResolved();
         }
 
         private void Initialize()
@@ -113,15 +116,18 @@ namespace Generation.Dungeon
             var mean = _vectorMean.CalculateMeans() * meanFactor;
             var index = 0;
             
-            foreach (var tile in _tiles.Where(tile => (tile.CollectiveSize > mean)))
+            foreach (var tile in _tiles)
             {
                 tile.Id = index;
-                _tiles[index].Type = TileType.Main;
                 index++;
+                
+                if (tile.CollectiveSize <= mean) continue; 
+                
+                tile.Type = TileType.Main;
             }
         }
 
-        private IEnumerator WaitForCollisionResolved(bool includeSmallTiles)
+        private IEnumerator WaitForCollisionResolved()
         {
             yield return new WaitForEndOfFrame();
 
@@ -157,7 +163,7 @@ namespace Generation.Dungeon
             
             // Loop through all tiles and add their positions to the _endpoints list.
             // If includeSmallTiles is set to true, it'll include all tiles in the calculation
-            foreach (var tile in includeSmallTiles ? _tiles : _mainTiles)
+            foreach (var tile in _includeSmallTiles ? _tiles : _mainTiles)
             {
                 var pos = tile.BottomRectangle.Center;
                 _endpoints.Add(new EdgeEndpoint(pos, tile));

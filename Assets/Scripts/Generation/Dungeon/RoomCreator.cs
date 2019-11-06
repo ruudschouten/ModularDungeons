@@ -67,11 +67,14 @@ namespace Generation.Dungeon
 
             _startPosition = lowest.BottomRectangle.Center;
             _endPosition = highest.BottomRectangle.Center;
-            // If the start position is the same as end position
-            if (_endPosition.Equals(_startPosition))
+            
+            if (!_endPosition.Equals(_startPosition)) return;
+            for (var i = tiles.Count - 1; i > 0; i--)
             {
-                // Set endPosition to the last room in 
-                _endPosition = tiles[tiles.Count - 1].BottomRectangle.Center;
+                if (tiles[i].Type == TileType.Regular) continue;
+                // Set endPosition to the last main room and stop looking for other positions
+                _endPosition = tiles[i].BottomRectangle.Center;
+                break;
             }
         }
 

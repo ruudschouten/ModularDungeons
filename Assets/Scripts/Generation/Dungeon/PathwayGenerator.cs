@@ -18,6 +18,9 @@ namespace Generation.Dungeon
         [SerializeField] private float pathWidth;
         [SerializeField] [MinValue(3)] private int rows;
         [SerializeField] [MinValue(2)] private int columns;
+        [SerializeField] private bool pathShouldHaveMinLength;
+        [ShowIf("pathShouldHaveMinLength")] [SerializeField] private float minLengthForPath;
+        [SerializeField] private float minLengthForCorner;
         [SerializeField] private bool addBranchingPaths;
         [ShowIf("addBranchingPaths")] [SerializeField] private int branchingPaths;
 
@@ -70,59 +73,131 @@ namespace Generation.Dungeon
             var pathways = new List<Edge>();
             foreach (var edge in edges)
             {
-                var start = edge.Start;
-                var end = edge.End;
-
                 // Get the closets points from the start and the end edge endpoint
-                var s = GetClosestPoint(start, end.Tile.BottomRectangle.Center, true);
-                var e = GetClosestPoint(end, s, true);
+                var s = GetClosestPoint(edge.Start, edge.End.Tile.BottomRectangle.Center);
+                var e = GetClosestPoint(edge.End, s);
 
-                var y = (s.y + e.y) / 2f;
-                var startPoint = new EdgeEndpoint(s, start.Tile);
-                var endPoint = new EdgeEndpoint(e, end.Tile);
-
-                float3 corner;
-                float3 secondaryCorner;
-                if (s.x < e.x) // if s is closer than e
+                if (pathShouldHaveMinLength)
                 {
-                    corner = new float3(s.x, y, e.z);
-                    secondaryCorner = new float3(corner.x + pathWidth, corner.y, e.z);
+                    var length = math.distance(s, e);
+                    if (length < minLengthForPath) continue;
                 }
-                else // if e is closer than s
-                {
-                    corner = new float3(e.x, y, s.z);
-                    secondaryCorner = new float3(corner.x - pathWidth, corner.y, s.z);
-                }
-
-                var yStartDist = math.distance(s.y, corner.y);
-                var yEndDist = math.distance(secondaryCorner.y, e.y);
-                var horizontal = math.distance(s.xz, end.Vertex.xz) / 2;
-
-                // Check if path length is long enough for it to gain a curve
-                if (yStartDist > 6f && yEndDist > 6f && horizontal > 15f)
-                {
-                    var cornerPoint = new EdgeEndpoint(corner);
-                    var secondaryPoint = new EdgeEndpoint(secondaryCorner);
-
-                    // Recheck which point is closer from the newest point
-                    e = GetClosestPoint(end, secondaryCorner, false);
-                    // Reassign positions
-                    endPoint = new EdgeEndpoint(e, end.Tile);
-
-                    pathways.Add(new Edge(startPoint, cornerPoint));
-                    pathways.Add(new Edge(cornerPoint, secondaryPoint));
-                    pathways.Add(new Edge(secondaryPoint, endPoint));
-                }
-                else
-                {
-                    pathways.Add(new Edge(startPoint, endPoint));
-                }
+                
+                pathways.AddRange(CreateEdges(edge, s, e));
             }
 
             return pathways;
         }
 
-        private float3 GetClosestPoint(EdgeEndpoint endpoint, float3 point, bool skipUsedSpots)
+        private List<Edge> CreateEdges(Edge edge, float3 closestStart, float3 closestEnd)
+        {
+            var edges = new List<Edge>();
+
+            var start = edge.Start;
+            var end = edge.End;
+            
+            var startPoint = new EdgeEndpoint(closestStart, start.Tile);
+            var endPoint = new EdgeEndpoint(closestEnd, end.Tile);
+            
+            var corners = CreateCorners(closestStart, closestEnd, out var skipCorner);
+
+            if (skipCorner)
+            {
+                edges.Add(new Edge(startPoint, endPoint));
+                return edges;
+            }
+            
+            var horizontal = MeetsHorizontalRequirements(closestStart, closestEnd, minLengthForCorner);
+            if (horizontal)
+            {
+                var cornerPoint = new EdgeEndpoint(corners[0]);
+                edges.Add(new Edge(startPoint, cornerPoint));
+                    
+                var vertical = MeetsVerticalRequirements(closestStart, closestEnd, corners, minLengthForCorner);
+                if (!vertical)
+                {
+                    edges.Add(new Edge(cornerPoint, endPoint));
+                    return edges;
+                }
+                
+                // Only add a secondary point for the corner if the vertical requirements are met
+                var secondaryPoint = new EdgeEndpoint(corners[1]);
+                
+                // Recheck which point is closer from the newest point
+                end.UsedCenters.Remove(closestEnd);
+                closestEnd = GetClosestPoint(end, corners[1]);
+                // Reassign positions
+                endPoint = new EdgeEndpoint(closestEnd, end.Tile);
+                    
+                edges.Add(new Edge(cornerPoint, secondaryPoint));
+                edges.Add(new Edge(secondaryPoint, endPoint));
+                return edges;
+            }
+            edges.Add(new Edge(startPoint, endPoint));
+            return edges;
+        }
+
+        /// <summary>
+        /// Returns a collection of positions which are used to create a corner.
+        /// </summary>
+        /// <param name="start">Start position</param>
+        /// <param name="end">End position</param>
+        /// <param name="shouldSkipCorner">Should this corner be skipped</param>
+        /// <returns></returns>
+        private List<float3> CreateCorners(float3 start, float3 end, out bool shouldSkipCorner)
+        {
+            shouldSkipCorner = false;
+            
+            var y = (start.y + end.y) / 2f;
+            var corners = new List<float3>();
+            var corner = new float3(start.x, y, end.z);
+            corners.Add(corner);
+            if (start.x < end.x) // if s is closer to the origin than e
+            {
+                if (start.z < end.z) // if s is closer to the right of the origin than e
+                {
+                    corners.Add(new float3(corner.x + pathWidth, corner.y, end.z));
+                }
+                else if (start.z > end.z) // if s if closer to the left of the origin than e
+                {
+                    corners.Add(new float3(end.x + pathWidth, corner.y, start.z));
+                }
+                else // if s is and e have the same distance from origin
+                {
+                    shouldSkipCorner = true;
+                }
+            }
+            else if (end.x < start.x) // if e is closer to the origin than s
+            {
+                if (end.z < start.z) // if e is closer to the right of the origin than s
+                {
+                    corners.Add(new float3(corner.x + pathWidth, corner.y, end.z));
+                }
+                else if (end.z > start.z) // if e is closer to the left of the origin than s
+                {
+                    corners.Add(new float3(end.x + pathWidth, corner.y, start.z));
+                }
+                else
+                {
+                    shouldSkipCorner = true;
+                }
+            }
+            else
+            {
+                shouldSkipCorner = true;
+            }
+
+            return corners;
+        }
+
+        /// <summary>
+        /// Loops through positions in the <paramref name="endpoint"/> to find which position is closest to <paramref name="point"/>
+        /// </summary>
+        /// <param name="endpoint">Endpoint which contains a closest position</param>
+        /// <param name="point">Point to check distance to</param>
+        /// <param name="skipUsedSpots">Should used spots be skipped</param>
+        /// <returns>The closest position</returns>
+        private float3 GetClosestPoint(EdgeEndpoint endpoint, float3 point, bool skipUsedSpots = true)
         {
             var closestDist = float.MaxValue;
             var closest = new float3(float.MaxValue, float.MaxValue, float.MaxValue);
@@ -145,6 +220,58 @@ namespace Generation.Dungeon
             }
 
             return closest;
+        }
+        
+        /// <summary>
+        /// Checks if the vertical length between <paramref name="start"/> and <paramref name="end"/> meet the <paramref name="requirement"/>
+        /// </summary>
+        /// <param name="start">Start position</param>
+        /// <param name="end">End position</param>
+        /// <param name="corners">Corner positions, right now only checks for two corners</param>
+        /// <param name="requirement">Required length that should be met</param>
+        /// <returns></returns>
+        private bool MeetsVerticalRequirements(float3 start, float3 end, List<float3> corners, float requirement)
+        {
+            var yLength = math.distance(start.y, end.y);
+            if (corners != null && corners.Any())
+            {
+                var yStartLength = math.distance(start.y, corners[0].y);
+                var yEndLength = math.distance(corners[corners.Count - 1].y, end.y);
+
+                if (yLength >= 1f)
+                {
+                    if (yStartLength >= requirement || yEndLength >= requirement)
+                    {
+                        return true;
+                    }
+                }
+            }
+            else
+            {
+                return yLength > requirement;
+            }
+
+            return false;
+        }
+        
+        /// <summary>
+        /// Checks if the horizontal length between <paramref name="start"/> and <paramref name="end"/> meet the <paramref name="requirement"/>
+        /// </summary>
+        /// <param name="start">Start position</param>
+        /// <param name="end">End position</param>
+        /// <param name="requirement">Required length that should be met</param>
+        /// <returns></returns>
+        private bool MeetsHorizontalRequirements(float3 start, float3 end, float requirement)
+        {
+            var xLength = math.distance(start.x, end.x);
+            var zLength = math.distance(start.z, end.z);
+
+            if (xLength >= requirement || zLength >= requirement)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         private void TurnPathwayIntoMesh(Edge edge)
