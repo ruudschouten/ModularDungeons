@@ -2,6 +2,8 @@
 
 This tool can be used to generate procedural dungeons. 
 
+![](Documentation/generation.gif)
+
 ## Installing
 
 Clone or download the repo and copy `3rd Party`, `Scripts`, `Prefabs`, `Materials` and `Texture` folder to your preferred Unity project. 
