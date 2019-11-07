@@ -27,6 +27,8 @@ namespace Generation.Dungeon.Parts
             get => modifier;
             set => modifier = value;
         }
+        
+        public Vector3 Center { get; set; } 
 
         #endregion
     }

@@ -25,6 +25,7 @@ namespace Generation.Dungeon
         [SerializeField] [ReorderableList] private List<Column> columns;
 
         public Transform RoomContainer => roomContainer;
+        public Dictionary<RoomModifier, List<Room>> Rooms => _rooms;
 
         public float LowestPoint => _lowestPoint;
         public float3 StartPosition => _startPosition;
@@ -34,11 +35,14 @@ namespace Generation.Dungeon
         private float _highestPoint = -1;
         private float3 _startPosition;
         private float3 _endPosition;
+        
+        private Dictionary<RoomModifier, List<Room>> _rooms;
 
         private void Initialize()
         {
             _lowestPoint = int.MaxValue;
             _highestPoint = -1;
+            _rooms = new Dictionary<RoomModifier, List<Room>>();
         }
 
         public void CreateRooms(IReadOnlyList<Tile> tiles)
@@ -95,8 +99,13 @@ namespace Generation.Dungeon
                     modifier = (RoomModifier) Random.NextInt(0, roomModifiers);
                     specialTiles--;
                 }
-
-                CreateRoom(tile, modifier, tile.Type);
+                
+                if (!_rooms.ContainsKey(modifier))
+                {
+                    _rooms.Add(modifier, new List<Room>());
+                }
+                
+                _rooms[modifier].Add(CreateRoom(tile, modifier, tile.Type));
             }
         }
 
@@ -124,7 +133,7 @@ namespace Generation.Dungeon
             lowest.Type = TileType.StaircaseDown;
         }
 
-        private void CreateRoom(Tile tile, RoomModifier modifier, TileType type)
+        private Room CreateRoom(Tile tile, RoomModifier modifier, TileType type)
         {
             var tileScale = tile.transform.localScale;
 
@@ -151,12 +160,16 @@ namespace Generation.Dungeon
                     break;
             }
 
+            room.Center = tile.BottomRectangle.Center + new float3(0, .5f, 0);
+
             Destroy(tile);
             Destroy(tile.GetComponent<Rigidbody>());
             Destroy(tile.GetComponent<BoxCollider>());
             Destroy(tile.GetComponent<MeshRenderer>());
 
             tile.transform.SetParent(room.transform, true);
+
+            return room;
         }
 
         private void CreateStairRoom(Tile tile, Room room, Vector3 tileScale, GameObject floor)
