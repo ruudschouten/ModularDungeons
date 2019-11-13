@@ -92,7 +92,8 @@ namespace Generation.Dungeon
             {
                 var pos = UnityEngine.Random.insideUnitSphere * radius;
                 pos.y = Random.NextFloat(verticalPosition.x, verticalPosition.y);
-                var tile = Instantiate(prefab, pos, Quaternion.identity, tileContainer);
+                var tile = Instantiate(prefab, tileContainer);
+                tile.transform.localPosition = pos;
                 tile.Type = TileType.Regular;
                 AlterTile(tile.transform);
                 _tiles.Add(tile);
