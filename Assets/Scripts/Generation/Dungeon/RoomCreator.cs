@@ -18,7 +18,6 @@ namespace Generation.Dungeon
         [SerializeField] private int minimumRegularRooms;
         [Tooltip("Extra chance the generator uses to use room modifiers")]
         [SerializeField] private int extraModifierChanceProbability;
-
         [Space] 
         [SerializeField] [ReorderableList] private List<GameObject> floors;
         [SerializeField] [ReorderableList] private List<GameObject> ceilings;
@@ -52,6 +51,8 @@ namespace Generation.Dungeon
             SetStaircases(tiles, out var highest, out var lowest);
 
             AssignModifiers(tiles, highest, lowest);
+
+            CleanupTiles(tiles);
         }
 
         private void AssignModifiers(IReadOnlyList<Tile> tiles, Tile highest, Tile lowest)
@@ -112,28 +113,35 @@ namespace Generation.Dungeon
         private void SetStaircases(IReadOnlyList<Tile> tiles, out Tile highest, out Tile lowest)
         {
             // Get highest and lowest tile
-            highest = tiles[0];
-            lowest = tiles[0];
-            foreach (var tile in tiles)
+            var highestIndex = 0;
+            var lowestIndex = tiles.Count - 1;
+
+            for (var i = 0; i < tiles.Count; i++)
             {
+                var tile = tiles[i];
                 if (tile.HighestPoint > _highestPoint)
                 {
                     _highestPoint = tile.HighestPoint;
-                    highest = tile;
+                    highestIndex = i;
+                    // Continue so the highest point can't also be the lowest point
+                    continue;
                 }
 
                 if (tile.LowestPoint < _lowestPoint)
                 {
                     _lowestPoint = tile.LowestPoint;
-                    lowest = tile;
+                    lowestIndex = i;
                 }
             }
 
-            highest.Type = TileType.StaircaseUp;
-            lowest.Type = TileType.StaircaseDown;
+            tiles[lowestIndex].Type = TileType.StaircaseDown;
+            tiles[highestIndex].Type = TileType.StaircaseUp;
+            
+            highest = tiles[highestIndex];
+            lowest = tiles[lowestIndex];
         }
 
-        private Room CreateRoom(Tile tile, RoomModifier modifier, TileType type)
+        protected Room CreateRoom(Tile tile, RoomModifier modifier, TileType type)
         {
             var tileScale = tile.transform.localScale;
 
@@ -162,14 +170,15 @@ namespace Generation.Dungeon
 
             room.Center = tile.BottomRectangle.Center + new float3(0, .5f, 0);
 
-            Destroy(tile);
-            Destroy(tile.GetComponent<Rigidbody>());
-            Destroy(tile.GetComponent<BoxCollider>());
-            Destroy(tile.GetComponent<MeshRenderer>());
-
-            tile.transform.SetParent(room.transform, true);
-
             return room;
+        }
+
+        protected virtual void CleanupTiles(IReadOnlyList<Tile> tiles)
+        {
+            foreach (var tile in tiles)
+            {
+                Destroy(tile.gameObject);
+            }
         }
 
         private void CreateStairRoom(Tile tile, Room room, Vector3 tileScale, GameObject floor)
