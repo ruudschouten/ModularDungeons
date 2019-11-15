@@ -29,7 +29,7 @@ namespace Generation.Dungeon
         public float3 EndPosition => roomCreator.EndPosition;
         public UnityEvent OnGenerationStartEvent => onGenerationStartEvent;
         public UnityEvent OnGenerationDoneEvent => onGenerationDoneEvent;
-        
+
         public TileGenerator TileGenerator => tileGenerator;
         public uint Seed => seed;
 
@@ -49,9 +49,9 @@ namespace Generation.Dungeon
 
         public virtual IEnumerator GenerateRoutine()
         {
-            onGenerationStartEvent.Invoke();
-            
             Initialize();
+            
+            onGenerationStartEvent.Invoke();
             
             yield return tileGenerator.GenerateRoutine(includeSmallTiles);
             
