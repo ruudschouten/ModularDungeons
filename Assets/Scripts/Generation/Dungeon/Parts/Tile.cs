@@ -16,6 +16,8 @@ namespace Generation.Dungeon.Parts
         [ShowIf("isColliding")] [SerializeField] private Tile collidesWith;
         [SerializeField] private new Collider collider;
         [SerializeField] private new Rigidbody rigidbody;
+        [SerializeField] private MeshRenderer meshRenderer;
+        
         [SerializeField] private float forceMultiplier = 500;
         [SerializeField] private Rectangle topRectangle;
         [SerializeField] private Rectangle bottomRectangle;
@@ -35,6 +37,9 @@ namespace Generation.Dungeon.Parts
             get => type;
             set => type = value;
         }
+
+        public MeshRenderer MeshRenderer => meshRenderer;
+        public Collider Collider => collider;
 
         public bool IsColliding => isColliding;
         public float CollectiveSize => transform.localScale.x + transform.localScale.y + transform.localScale.z;
